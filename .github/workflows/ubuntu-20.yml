@@ -1,0 +1,44 @@
+name: CMake
+
+on:
+  push:
+    branches: [ linux ]
+  pull_request:
+    branches: [ linux ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: Jimver/cuda-toolkit@v0.2.5
+      id: cuda-toolkit
+      with:
+        cuda: '11.5.1'
+
+    - name: Update submodules
+      run: git submodule update --init
+
+    - name: Install libcurl
+      run: sudo apt install -y libcurl4-openssl-dev
+
+    - name: Configure CMake GPU
+      run: cmake -B ${{github.workspace}}/build-gpu -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}  -DWITH_GPU=ON
+
+    - name: Build GPU
+      run: cmake --build ${{github.workspace}}/build-gpu --config ${{env.BUILD_TYPE}}
+    - name: Package
+      run: cd ${{github.workspace}}/build-gpu && tar czf aquaminer-gpu-20.04.tar.gz aquaminer-gpu
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest-ubuntu-20.04"
+        prerelease: true
+        title: "Development Build 20.04"
+        files: |
+          ${{github.workspace}}/build-gpu/aquaminer-gpu-20.04.tar.gz

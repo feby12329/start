@@ -1,0 +1,6 @@
+[submodule "aquahash"]
+	path = aquahash
+	url = http://github.com/aquachain/aquahash.git
+[submodule "rapidjson"]
+	path = rapidjson
+	url = https://github.com/Tencent/rapidjson
